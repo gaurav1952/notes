@@ -82,15 +82,20 @@ func main() {
 				checkerr(err)
 
 				currentTime := time.Now()
+				user_current_time := time.Now().Format("3:4 pm")
 
 				date := currentTime.Format("2006-01-02")
 
-				statement, err = db.Prepare("INSERT INTO notes (note , created_date) VALUES (?,?)")
+				statement, err = db.Prepare("INSERT INTO notes (note , created_date, created_time) VALUES (?,?,?)")
 				checkerr(err)
-				_, execErr := statement.Exec(user_notes, date)
+				_, execErr := statement.Exec(user_notes, date, user_current_time)
 				checkerr(execErr)
 
 			}
+			// if v == "time" {
+			// 	current_time := time.Now().Format("3:4 pm")
+			// 	fmt.Println(current_time)
+			// }
 
 			if v == "show" {
 				rows, err := db.Query("select id, note, created_date, created_time from notes")
