@@ -117,4 +117,6 @@ Ensure **/usr/local/bin** is included in your **PATH**. You can check this with:
  echo $PATH
 ```
 
+## LICENSE
 
+[MIT](./LICENSE)
