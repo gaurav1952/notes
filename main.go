@@ -30,6 +30,17 @@ func initdb() (*sql.DB, error) {
 }
 
 func main() {
+	// colors
+	reset := "\033[0m"
+	red := "\033[31m"
+	// green := "\033[32m"
+	// yellow := "\033[33m"
+	blue := "\033[34m"
+	// purple := "\033[35m"
+	// cyan := "\033[36m"
+	// gray := "\033[37m"
+	// white := "\033[97m"
+
 	// color design
 	helpStyle_underline := color.New(color.FgHiCyan).Add(color.Underline).SprintFunc()
 	helpStyle_notes_func_command := color.New(color.FgGreen).SprintFunc()
@@ -125,7 +136,7 @@ func main() {
 					if len(created_date) >= 10 {
 						created_date = created_date[:10]
 					}
-					notes_table.AppendRow(table.Row{id, note, created_date, created_time})
+					notes_table.AppendRow(table.Row{red + id + reset, note, blue + created_date + reset, blue + created_time + reset})
 
 				}
 				notes_table.SetStyle(table.StyleRounded)
