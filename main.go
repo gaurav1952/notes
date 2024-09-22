@@ -56,9 +56,42 @@ func main() {
 	statement.Exec()
 
 	if len(os.Args) == 1 {
+		rows, err := db.Query("select id, note, created_date, created_time from notes")
+		checkerr(err)
+		headerStyle := color.New(color.FgCyan, color.Bold).SprintFunc()
+
+		notes_table := table.NewWriter()
+		notes_table.SetOutputMirror(os.Stdout)
+		notes_table.AppendHeader(table.Row{
+			headerStyle("#"),
+			headerStyle("Note"),
+			headerStyle("Created Date"),
+			headerStyle("Created Time"),
+		})
+
+		var id string
+		var note string
+
+		var created_date string
+		var created_time string
+		for rows.Next() {
+			rows.Scan(&id, &note, &created_date, &created_time)
+
+			// for i := 1; i < len(id); i++ {
+
+			// }
+			if len(created_date) >= 10 {
+				created_date = created_date[:10]
+			}
+			notes_table.AppendRow(table.Row{red + id + reset, note, blue + created_date + reset, blue + created_time + reset})
+
+		}
+		notes_table.SetStyle(table.StyleRounded)
+		notes_table.Render()
+
 		// .Add(color.Underline)
 		c := color.New(color.FgRed).Add(color.Bold)
-		c.Println("No valid command provided. Try 'notes help' for usage.")
+		c.Println("Try 'notes help' for usage.")
 	}
 
 	if len(os.Args) > 1 {
