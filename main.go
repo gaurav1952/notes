@@ -22,7 +22,7 @@ func checkerr(err error) {
 }
 
 func initdb() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", "./notes.db")
+	db, err := sql.Open("sqlite3", "notes.db")
 	if err != nil {
 		return nil, err
 	}
@@ -77,9 +77,6 @@ func main() {
 		for rows.Next() {
 			rows.Scan(&id, &note, &created_date, &created_time)
 
-			// for i := 1; i < len(id); i++ {
-
-			// }
 			if len(created_date) >= 10 {
 				created_date = created_date[:10]
 			}
@@ -136,10 +133,6 @@ func main() {
 				checkerr(execErr)
 
 			}
-			// if v == "time" {
-			// 	current_time := time.Now().Format("3:4 pm")
-			// 	fmt.Println(current_time)
-			// }
 
 			if v == "show" {
 				rows, err := db.Query("select id, note, created_date, created_time from notes")
@@ -163,9 +156,6 @@ func main() {
 				for rows.Next() {
 					rows.Scan(&id, &note, &created_date, &created_time)
 
-					// for i := 1; i < len(id); i++ {
-
-					// }
 					if len(created_date) >= 10 {
 						created_date = created_date[:10]
 					}
