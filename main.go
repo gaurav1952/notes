@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/fatih/color"
@@ -15,37 +17,63 @@ import (
 
 func checkerr(err error) {
 	if err != nil {
-		log.Printf("error: %v", err)
 		log.Fatal(err)
 
 	}
 }
 
-func initdb() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", "notes.db")
+func initdb(user_filepath string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite3", user_filepath)
 	if err != nil {
 		return nil, err
 	}
+
 	return db, err
+
 }
 
+func getFilePath() (string, error) {
+	var user_filepath string
+
+	homedir, err := os.UserHomeDir()
+	checkerr(err)
+
+	switch runtime.GOOS {
+	case "windows", "darwin", "linux":
+		user_filepath = filepath.Join(homedir, "db", "notes.db")
+	default:
+		return "", fmt.Errorf("unspported platform")
+	}
+	return user_filepath, nil
+
+}
+func createFile() string {
+	user_filepath, err := getFilePath()
+	checkerr(err)
+
+	err = os.MkdirAll(filepath.Dir(user_filepath), 0755)
+	checkerr(err)
+
+	if _, err := os.Stat(user_filepath); os.IsNotExist(err) {
+		file, err := os.Create(user_filepath)
+		checkerr(err)
+		defer file.Close()
+
+	}
+	return user_filepath
+}
 func main() {
 	// colors
 	reset := "\033[0m"
 	red := "\033[31m"
-	// green := "\033[32m"
-	// yellow := "\033[33m"
 	blue := "\033[34m"
-	// purple := "\033[35m"
-	// cyan := "\033[36m"
-	// gray := "\033[37m"
-	// white := "\033[97m"
 
 	// color design
-	helpStyle_underline := color.New(color.FgHiCyan).Add(color.Underline).SprintFunc()
-	helpStyle_notes_func_command := color.New(color.FgGreen).SprintFunc()
+	helpStyle_underline := color.New(color.FgHiCyan).SprintFunc()
+	helpStyle_working_command := color.New(color.FgWhite).SprintFunc()
 
-	db, err := initdb()
+	user_filepath := createFile()
+	db, err := initdb(user_filepath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,6 +117,7 @@ func main() {
 		// .Add(color.Underline)
 		c := color.New(color.FgRed).Add(color.Bold)
 		c.Println("Try 'notes help' for usage.")
+
 	}
 
 	if len(os.Args) > 1 {
@@ -100,10 +129,11 @@ func main() {
 				fmt.Println("  notes [command]")
 				fmt.Println()
 				fmt.Println("Available commands:")
-				fmt.Println(helpStyle_underline("help") + "   - Show this help message")
-				fmt.Println(helpStyle_notes_func_command("add") + " -  Add notes (Enter to type notes)")
-				fmt.Println(helpStyle_notes_func_command("show") + " -  Show notes  ")
-				fmt.Println(helpStyle_notes_func_command("rm") + " -  Delete notes ")
+				fmt.Println(helpStyle_working_command("help ") + " - " + helpStyle_underline("    		Show this help message"))
+				fmt.Println(helpStyle_working_command("add ") + " - " + helpStyle_underline("    		Add notes (Enter to type notes)"))
+				fmt.Println(helpStyle_working_command("ls ") + " - " + helpStyle_underline("    		Lists all the notes  "))
+				fmt.Println(helpStyle_working_command("rm [note id] ") + " - " + helpStyle_underline("    	Delete notes "))
+				fmt.Println(helpStyle_working_command("done ") + " - " + helpStyle_underline("    		Delete when done with one session "))
 				return
 			}
 
@@ -134,7 +164,7 @@ func main() {
 
 			}
 
-			if v == "show" {
+			if v == "ls" {
 				rows, err := db.Query("select id, note, created_date, created_time from notes")
 				checkerr(err)
 				headerStyle := color.New(color.FgCyan, color.Bold).SprintFunc()
@@ -165,6 +195,12 @@ func main() {
 				notes_table.SetStyle(table.StyleRounded)
 				notes_table.Render()
 
+			}
+			if v == "done" {
+				err := db.Close()
+				checkerr(err)
+				e := os.Remove(user_filepath)
+				checkerr(e)
 			}
 		}
 
