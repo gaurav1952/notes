@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/fatih/color"
@@ -67,7 +68,7 @@ func main() {
 	reset := "\033[0m"
 	red := "\033[31m"
 	blue := "\033[34m"
-
+	i := 1
 	// color design
 	helpStyle_underline := color.New(color.FgHiCyan).SprintFunc()
 	helpStyle_working_command := color.New(color.FgWhite).SprintFunc()
@@ -108,8 +109,8 @@ func main() {
 			if len(created_date) >= 10 {
 				created_date = created_date[:10]
 			}
-			notes_table.AppendRow(table.Row{red + id + reset, note, blue + created_date + reset, blue + created_time + reset})
-
+			notes_table.AppendRow(table.Row{red + strconv.Itoa(i) + reset, note, blue + created_date + reset, blue + created_time + reset})
+			i += 1
 		}
 		notes_table.SetStyle(table.StyleRounded)
 		notes_table.Render()
